@@ -2,7 +2,7 @@
 SPDX-FileCopyrightText: 2024 DESY and the Constellation authors
 SPDX-License-Identifier: EUPL-1.2
 
-Provides the class for the AIM-TTi QL Series satellite.
+Provides the class for the AIM-TTi QL355TP  satellite.
 """
 
 import time
@@ -17,11 +17,11 @@ from constellation.core.monitoring import schedule_metric
 
 from .QL355TPII import QL355TPII
 
-sampling_interval = 2.0 
+sampling_interval = 2.0 # Interval in seconds for metric sampling (e.g., voltage, current, status)
 
 class TTiQLSatellite(Satellite):
     """
-    Satellite controlling an AIM-TTi QL Series power supply.
+    Satellite controlling an AIM-TTi QL355TP  power supply.
     
     Provides independent channel control, sequenced launching, 
     and voltage ramping capabilities.
@@ -33,31 +33,28 @@ class TTiQLSatellite(Satellite):
 
     def do_initializing(self, config: Configuration) -> str:
         """Read configuration, establish connection, and apply limits."""
-        self.ip = config["ip"]
+        self.ip = config["ip"] # IP address of the TTi device on the network
         
-        def get_cfg(key, default):
-            return config[key] if key in config else default
+        self.v1 = config["voltage1"] # Target voltage for channel 1 (in volts)
+        self.i1 = config["current_limit1"]  # Current limit for channel 1 (in amps)
+        self.ovp1 = config["ovp1"] # Over-voltage protection for channel 1 (in volts)
+        self.ocp1 = config["ocp1"] # Over-current protection for channel 1 (in amps)
 
-        self.v1 = float(get_cfg("voltage1", 0.0))
-        self.i1 = float(get_cfg("current_limit1", 1.0))
-        self.ovp1 = float(get_cfg("ovp1", 40.0))
-        self.ocp1 = float(get_cfg("ocp1", 5.5))
-
-        self.v2 = float(get_cfg("voltage2", 0.0))
-        self.i2 = float(get_cfg("current_limit2", 1.0))
-        self.ovp2 = float(get_cfg("ovp2", 40.0))
-        self.ocp2 = float(get_cfg("ocp2", 5.5))
-
-        self.enable_ch1 = bool(get_cfg("enable_ch1", False))
-        self.enable_ch2 = bool(get_cfg("enable_ch2", False))
-        self.launch_order = get_cfg("launch_order", [1, 2])
-        self.delay_between = float(get_cfg("delay_between", 1.0))
-        self.start_delay = float(get_cfg("start_delay", 0.0))
+        self.v2 = config["voltage2"] # Target voltage for channel 2 (in volts)
+        self.i2 = config["current_limit2"] # Current limit for channel 2 (in amps)
+        self.ovp2 = config["ovp2"] # Over-voltage protection for channel 2 (in volts)
+        self.ocp2 = config["ocp2"] # Over-current protection for channel 2 (in amps)
         
-        self.ramp_ch1 = bool(get_cfg("ramp_ch1", False))
-        self.ramp_ch2 = bool(get_cfg("ramp_ch2", False))
-        self.ramp_step = float(get_cfg("ramp_step", 1.0))
-        self.ramp_delay = float(get_cfg("ramp_delay", 1.0))
+        self.enable_ch1 = config["enable_ch1"] # Whether to include channel 1 in the launch sequence (True/False)
+        self.enable_ch2 = config["enable_ch2"] # Whether to include channel 2 in the launch sequence (True/False)
+        self.launch_order = config["launch_order"] # List defining the sequence of channel activation (e.g., [1, 2] or [2, 1])
+        self.delay_between = config["delay_between"] # Delay in seconds between channel activations in the launch sequence
+        self.start_delay = config["start_delay"] # Delay in seconds before starting the launch sequence
+
+        self.ramp_ch1 = config["ramp_ch1"] # Whether to apply a voltage ramp on channel 1 during launch/landing (True/False)
+        self.ramp_ch2 = config["ramp_ch2"] # Whether to apply a voltage ramp on channel 2 during launch/landing (True/False)
+        self.ramp_step = config["ramp_step"] # Voltage step for the ramp (in volts)
+        self.ramp_delay = config["ramp_delay"] # Delay in seconds between voltage steps (in seconds)
 
         try:
             self.device = QL355TPII(self.ip)
@@ -151,6 +148,27 @@ class TTiQLSatellite(Satellite):
                 time.sleep(self.ramp_delay)
                 
         self.device.set_output(ch, False)
+
+    def reentry(self) -> None:
+        """Safely close the device connection on shutdown."""
+        if self.device: self.device.close()
+        super().reentry()
+
+    def do_reconfigure(self, partial_config: Configuration) -> str:
+        """Handle dynamic configuration updates from the network."""
+        if "voltage1" in partial_config:
+            self.v1 = partial_config["voltage1"]
+            self.device.set_voltage(1, self.v1)
+        if "current_limit1" in partial_config:
+            self.i1 = partial_config["current_limit1"]
+            self.device.set_current_limit(1, self.i1)
+        if "voltage2" in partial_config:
+            self.v2 = partial_config["voltage2"]
+            self.device.set_voltage(2, self.v2)
+        if "current_limit2" in partial_config:
+            self.i2 = partial_config["current_limit2"]
+            self.device.set_current_limit(2, self.i2)
+        return "Reconfigured"
 
     # --------------------------------------------------------------------------
     # METRICS
@@ -257,28 +275,3 @@ class TTiQLSatellite(Satellite):
             self.log.info(f"Output CH{channel} -> {s_str}")
             return f"CH{channel} is {s_str}", state, {}
         return "Error", None, {}
-
-    # --------------------------------------------------------------------------
-    # STATE MACHINE HANDLERS
-    # --------------------------------------------------------------------------
-
-    def reentry(self) -> None:
-        """Safely close the device connection on shutdown."""
-        if self.device: self.device.close()
-        super().reentry()
-
-    def do_reconfigure(self, partial_config: Configuration) -> str:
-        """Handle dynamic configuration updates from the network."""
-        if "voltage1" in partial_config:
-            self.v1 = partial_config["voltage1"]
-            self.device.set_voltage(1, self.v1)
-        if "current_limit1" in partial_config:
-            self.i1 = partial_config["current_limit1"]
-            self.device.set_current_limit(1, self.i1)
-        if "voltage2" in partial_config:
-            self.v2 = partial_config["voltage2"]
-            self.device.set_voltage(2, self.v2)
-        if "current_limit2" in partial_config:
-            self.i2 = partial_config["current_limit2"]
-            self.device.set_current_limit(2, self.i2)
-        return "Reconfigured"
