@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2024 DESY and the Constellation authors
 # SPDX-License-Identifier: CC-BY-4.0 OR EUPL-1.2
 title: "TTiQL"
-description: "Satellite controlling an AIM-TTi QL Series power supply"
+description: "Satellite controlling an AIM-TTi QL355TP power supply"
 ---
 
 ## Description
