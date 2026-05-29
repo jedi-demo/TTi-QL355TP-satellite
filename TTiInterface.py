@@ -2,7 +2,7 @@
 SPDX-FileCopyrightText: 2024 DESY and the Constellation authors
 SPDX-License-Identifier: EUPL-1.2
 
-Abstract TCP/IP socket interface for AIM-TTi power supplies.
+Abstract TCP/IP socket interface for AIM-TTi QL355TP power supplies.
 """
 
 from abc import ABCMeta, abstractmethod
