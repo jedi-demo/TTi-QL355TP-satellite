@@ -28,26 +28,26 @@ Supports dual independent outputs with dynamic voltage and current limit adjustm
 
 ## Parameters
 
-| Parameter | Description | Type | Default Value |
+| Parameter | Description | Type | Example |
 |-----------|-------------|------|---------------|
-| `ip` | IP address of the instrument on the network | String | - |
-| `enable_ch1` | Enable output for Channel 1 on launch | Bool | `false` |
-| `enable_ch2` | Enable output for Channel 2 on launch | Bool | `false` |
-| `launch_order` | Sequence order for turning on channels (e.g. `[1, 2]`) | List | `[1, 2]` |
+| `ip` | IP address of the instrument on the network | String | 192.168.1.15 |
+| `enable_ch1` | Enable output for Channel 1 on launch | Bool | `true` / `false` |
+| `enable_ch2` | Enable output for Channel 2 on launch | Bool | `true` / `false` |
+| `launch_order` | Sequence order for turning on channels | List | `[1, 2]` / `[2, 1]` |
 | `delay_between`| Time to wait between turning on channels | Float | `1.0` |
 | `start_delay` | Initial safety delay before starting launch sequence | Float | `0.0` |
-| `ramp_ch1` | Enable voltage ramping for Channel 1 | Bool | `false` |
-| `ramp_ch2` | Enable voltage ramping for Channel 2 | Bool | `false` |
+| `ramp_ch1` | Enable voltage ramping for Channel 1 | Bool | `true` / `false` |
+| `ramp_ch2` | Enable voltage ramping for Channel 2 | Bool | `true` / `false` |
 | `ramp_step` | Voltage increment per step during ramping | Float | `1.0` |
 | `ramp_delay` | Wait time between voltage increments | Float | `1.0` |
 | `voltage1` | Target output voltage for Channel 1 | Float | `0.0` |
 | `current_limit1`| Current limit in Ampere for Channel 1 | Float | `1.0` |
-| `ovp1` | Over-voltage protection limit for Channel 1 | Float | `40.0` |
-| `ocp1` | Over-current protection limit for Channel 1 | Float | `5.5` |
+| `ovp1` | Over-voltage protection limit for Channel 1 | Float | `1.0` |
+| `ocp1` | Over-current protection limit for Channel 1 | Float | `2` |
 | `voltage2` | Target output voltage for Channel 2 | Float | `0.0` |
 | `current_limit2`| Current limit in Ampere for Channel 2 | Float | `1.0` |
-| `ovp2` | Over-voltage protection limit for Channel 2 | Float | `40.0` |
-| `ocp2` | Over-current protection limit for Channel 2 | Float | `5.5` |
+| `ovp2` | Over-voltage protection limit for Channel 2 | Float | `1` |
+| `ocp2` | Over-current protection limit for Channel 2 | Float | `2` |
 
 ## Metrics
 
