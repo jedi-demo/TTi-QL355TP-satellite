@@ -47,7 +47,7 @@ class TTiQLSatellite(Satellite):
         
         self.enable_ch1 = config["enable_ch1"] # Whether to include channel 1 in the launch sequence (True/False)
         self.enable_ch2 = config["enable_ch2"] # Whether to include channel 2 in the launch sequence (True/False)
-        self.launch_order = config["launch_order"] # List defining the sequence of channel activation (e.g., [1, 2] or [2, 1])
+        self.launch_order = config["launch_order"] # List defining the sequence of channel activation (e.g., [1, 2] , [2, 1] or ["both"])
         self.delay_between = config["delay_between"] # Delay in seconds between channel activations in the launch sequence
         self.start_delay = config["start_delay"] # Delay in seconds before starting the launch sequence
 
@@ -89,7 +89,11 @@ class TTiQLSatellite(Satellite):
             time.sleep(self.start_delay)
         msg = []
         for ch in self.launch_order:
-            if ch == 1 and self.enable_ch1:
+            if str(ch).lower() == "both":
+                self._launch_both_channels()
+                msg.append("CH1+CH2 ON")
+                time.sleep(self.delay_between)        
+            elif ch == 1 and self.enable_ch1:
                 self._launch_channel(1, self.v1, self.ramp_ch1)
                 msg.append("CH1 ON")
                 time.sleep(self.delay_between)
@@ -106,7 +110,10 @@ class TTiQLSatellite(Satellite):
         """Stop the active channels using the reverse sequence."""
         landing_order = reversed(self.launch_order)
         for ch in landing_order:
-            if ch == 1 and self.enable_ch1:
+            if str(ch).lower() == "both":
+                self._land_both_channels()
+                time.sleep(self.delay_between)
+            elif ch == 1 and self.enable_ch1:
                 self._land_channel(1, self.v1, self.ramp_ch1)
                 time.sleep(self.delay_between)
             elif ch == 2 and self.enable_ch2:
@@ -133,7 +140,35 @@ class TTiQLSatellite(Satellite):
         else:
             self.device.set_voltage(ch, target_v)
             self.device.set_output(ch, True)
+    def _launch_both_channels(self):
+        """Helper method to turn on both channels simultaneously, interleaving ramps if needed."""
+        ramp1 = self.ramp_ch1 and self.enable_ch1
+        ramp2 = self.ramp_ch2 and self.enable_ch2
 
+        if self.enable_ch1:
+            self.device.set_voltage(1, 0.0 if ramp1 else self.v1)
+            self.device.set_output(1, True)
+            
+        if self.enable_ch2:
+            self.device.set_voltage(2, 0.0 if ramp2 else self.v2)
+            self.device.set_output(2, True)
+
+        if ramp1 or ramp2:
+            self.log.info("RAMP CH1+CH2: Ramping up...")
+            current_v1, current_v2 = 0.0, 0.0
+
+            while (ramp1 and current_v1 < self.v1) or (ramp2 and current_v2 < self.v2):
+                if ramp1 and current_v1 < self.v1:
+                    current_v1 = min(current_v1 + self.ramp_step, self.v1)
+                    self.device.set_voltage(1, current_v1)
+                
+                if ramp2 and current_v2 < self.v2:
+                    current_v2 = min(current_v2 + self.ramp_step, self.v2)
+                    self.device.set_voltage(2, current_v2)
+                
+                self.log.info(f"RAMP CH1+CH2: CH1={current_v1}V, CH2={current_v2}V")
+                time.sleep(self.ramp_delay)
+                
     def _land_channel(self, ch: int, target_v: float, do_ramp: bool):
         """Helper method to turn off a channel, applying a downward ramp if configured."""
         if do_ramp:
@@ -148,7 +183,31 @@ class TTiQLSatellite(Satellite):
                 time.sleep(self.ramp_delay)
                 
         self.device.set_output(ch, False)
+    def _land_both_channels(self):
+        """Helper method to turn off both channels simultaneously, interleaving downward ramps if needed."""
+        ramp1 = self.ramp_ch1 and self.enable_ch1
+        ramp2 = self.ramp_ch2 and self.enable_ch2
 
+        if ramp1 or ramp2:
+            self.log.info("RAMP CH1+CH2: Ramping down...")
+            current_v1 = self.v1 if ramp1 else 0.0
+            current_v2 = self.v2 if ramp2 else 0.0
+
+            while (ramp1 and current_v1 > 0) or (ramp2 and current_v2 > 0):
+                if ramp1 and current_v1 > 0:
+                    current_v1 = max(current_v1 - self.ramp_step, 0.0)
+                    self.device.set_voltage(1, current_v1)
+                
+                if ramp2 and current_v2 > 0:
+                    current_v2 = max(current_v2 - self.ramp_step, 0.0)
+                    self.device.set_voltage(2, current_v2)
+                
+                self.log.info(f"RAMP CH1+CH2: CH1={current_v1}V, CH2={current_v2}V")
+                time.sleep(self.ramp_delay)
+                
+        if self.enable_ch1: self.device.set_output(1, False)
+        if self.enable_ch2: self.device.set_output(2, False)
+        
     def reentry(self) -> None:
         """Safely close the device connection on shutdown."""
         if self.device: self.device.close()
