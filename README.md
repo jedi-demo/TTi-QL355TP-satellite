@@ -1,5 +1,5 @@
 ---
-# SPDX-FileCopyrightText: 2024 DESY and the Constellation authors
+# SPDX-FileCopyrightText: 2026 PixLab, IFIC(CSIC-UV) 
 # SPDX-License-Identifier: CC-BY-4.0 OR EUPL-1.2
 title: "TTiQL"
 description: "Satellite controlling an AIM-TTi QL355TP power supply"
