@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: CC-BY-4.0 OR EUPL-1.2
 title: "TTiQL"
 description: "Satellite controlling an AIM-TTi QL355TP power supply"
+category: "Power Supplies"
+language: "Python"
+parent_class: "Satellite"
 ---
 
 ## Description
@@ -51,15 +54,15 @@ Supports dual independent outputs with dynamic voltage and current limit adjustm
 
 ## Metrics
 
-| Metric | Description | Value Type | Metric Type | Interval |
-|--------|-------------|------------|-------------|----------|
-| `CH1_V` | Voltage output readback Channel 1 | Float | `LAST_VALUE` | 2.0s |
-| `CH1_I` | Current output readback Channel 1 | Float | `LAST_VALUE` | 2.0s |
-| `CH1_STAT` | Limit Status Register Channel 1 | Integer | `LAST_VALUE` | 2.0s |
-| `CH2_V` | Voltage output readback Channel 2 | Float | `LAST_VALUE` | 2.0s |
-| `CH2_I` | Current output readback Channel 2 | Float | `LAST_VALUE` | 2.0s |
-| `CH2_STAT` | Limit Status Register Channel 2 | Integer | `LAST_VALUE` | 2.0s |
-| `LAST_ERROR`| Execution Error Code | Integer | `LAST_VALUE` | 2.0s |
+| Metric | Description | Value Type | Interval |
+|--------|-------------|------------|----------|
+| `CH1_V` | Voltage output readback Channel 1 | Float | 2.0s |
+| `CH1_I` | Current output readback Channel 1 | Float | 2.0s |
+| `CH1_STAT` | Limit Status Register Channel 1 | Integer | 2.0s |
+| `CH2_V` | Voltage output readback Channel 2 | Float | 2.0s |
+| `CH2_I` | Current output readback Channel 2 | Float | 2.0s |
+| `CH2_STAT` | Limit Status Register Channel 2 | Integer | 2.0s |
+| `LAST_ERROR`| Execution Error Code | Integer | 2.0s |
 
 ## Custom Commands
 
