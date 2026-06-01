@@ -33,7 +33,7 @@ Supports dual independent outputs with dynamic voltage and current limit adjustm
 | `ip` | IP address of the instrument on the network | String | 192.168.1.15 |
 | `enable_ch1` | Enable output for Channel 1 on launch | Bool | `true` / `false` |
 | `enable_ch2` | Enable output for Channel 2 on launch | Bool | `true` / `false` |
-| `launch_order` | Sequence order for turning on channels | List | `[1, 2]` / `[2, 1]` |
+| `launch_order` | Sequence order for turning on channels | List | `[1, 2]` / `[2, 1]` / `["both"]` |
 | `delay_between`| Time to wait between turning on channels (in seconds) | Float | `1.0` |
 | `start_delay` | Initial safety delay before starting launch sequence (in seconds) | Float | `0.0` |
 | `ramp_ch1` | Enable voltage ramping for Channel 1 | Bool | `true` / `false` |
