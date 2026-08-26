@@ -12,7 +12,6 @@ from constellation.core.configuration import Configuration
 from constellation.core.satellite import Satellite
 from constellation.core.commandmanager import cscp_requestable
 from constellation.core.fsm import SatelliteState
-from constellation.core.message.cscp1 import CSCP1Message
 from constellation.core.monitoring import schedule_metric
 
 from .QL355TPII import QL355TPII
@@ -277,17 +276,8 @@ class TTiQLSatellite(Satellite):
     # --------------------------------------------------------------------------
 
     @cscp_requestable
-    def set_live_voltage(self, request: CSCP1Message) -> tuple[str, Any, dict]:
+    def set_live_voltage(self, channel: int, voltage: float) -> tuple[str, Any, dict]:
         """Change the target voltage of a specific channel dynamically."""
-        data = request.payload
-        channel = 1
-        voltage = 0.0
-
-        if isinstance(data, (int, float)):
-            voltage = float(data)
-        elif isinstance(data, dict):
-            channel = data.get("ch", 1)
-            voltage = float(data.get("v", 0.0))
         
         if self.device:
             self.device.set_voltage(channel, voltage)
@@ -297,17 +287,8 @@ class TTiQLSatellite(Satellite):
             return "Error: Device not connected", None, {}
 
     @cscp_requestable
-    def set_live_current(self, request: CSCP1Message) -> tuple[str, Any, dict]:
+    def set_live_current(self, channel: int, current: float) -> tuple[str, Any, dict]:
         """Change the current limit of a specific channel dynamically."""
-        data = request.payload
-        channel = 1
-        current = 0.0
-
-        if isinstance(data, (int, float)):
-            current = float(data)
-        elif isinstance(data, dict):
-            channel = data.get("ch", 1)
-            current = float(data.get("i", 0.0))
 
         if self.device:
             self.device.set_current_limit(channel, current)
@@ -316,17 +297,8 @@ class TTiQLSatellite(Satellite):
         return "Error", None, {}
 
     @cscp_requestable
-    def set_output_state(self, request: CSCP1Message) -> tuple[str, Any, dict]:
+    def set_output_state(self, channel: int, state: bool) -> tuple[str, Any, dict]:
         """Turn a specific channel ON or OFF dynamically."""
-        data = request.payload
-        channel = 1
-        state = False
-        
-        if isinstance(data, bool) or isinstance(data, int):
-            state = bool(data)
-        elif isinstance(data, dict):
-            channel = data.get("ch", 1)
-            state = bool(data.get("on", False))
 
         if self.device:
             self.device.set_output(channel, state)
