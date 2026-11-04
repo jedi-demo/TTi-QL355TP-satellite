@@ -63,6 +63,7 @@ Supports dual independent outputs with dynamic voltage and current limit adjustm
 | `CH2_I` | Current output readback Channel 2 | Float | 2.0s |
 | `CH2_STAT` | Limit Status Register Channel 2 | Integer | 2.0s |
 | `LAST_ERROR`| Execution Error Code | Integer | 2.0s |
+| `IS_ALIVE`| Checks if the unit answers (only checked in `ORBIT` and `RUN`) | Bool | 2.0s |
 
 ## Custom Commands
 
